@@ -1,0 +1,509 @@
+% Exact LaTeX recreation of the supplied Phase-1.pdf
+% Compile with XeLaTeX.
+% Place member pictures in the same folder as this .tex file.
+
+\documentclass[11pt,a4paper]{article}
+
+% -------------------------------------------------
+% IMAGE SETTINGS
+% -------------------------------------------------
+\usepackage[final]{graphicx}
+\setkeys{Gin}{draft=false}
+
+% -------------------------------------------------
+% PACKAGES
+% -------------------------------------------------
+\usepackage[a4paper,left=2.0cm,right=2.0cm,top=1.55cm,bottom=1.55cm]{geometry}
+
+% ACTUAL TIMES NEW ROMAN
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{setspace}
+
+% -------------------------------------------------
+% COLOURS
+% -------------------------------------------------
+\definecolor{TitleBlue}{RGB}{61,103,154}
+
+% -------------------------------------------------
+% GENERAL SETTINGS
+% -------------------------------------------------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\renewcommand{\arraystretch}{1.0}
+
+% Make all existing \textit commands normal text
+\renewcommand{\textit}[1]{#1}
+
+% -------------------------------------------------
+% HEADINGS
+% -------------------------------------------------
+
+\newcommand{\blueheading}[1]{%
+    {\rmfamily\color{TitleBlue}\fontsize{15}{18}\selectfont #1}%
+}
+
+\newcommand{\bluebigheading}[1]{%
+    {\rmfamily\bfseries\color{TitleBlue}\fontsize{16}{19}\selectfont #1}%
+}
+
+\newcommand{\instruction}[1]{%
+    {\rmfamily\fontsize{10.5}{12.5}\selectfont #1}%
+}
+
+\newcommand{\answerbox}[2][3.0cm]{%
+    \vspace{2pt}
+    \noindent
+    \fbox{%
+        \begin{minipage}[t][#1][t]{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}
+            \vspace{1mm}
+            \rmfamily #2
+        \end{minipage}
+    }
+}
+
+% -------------------------------------------------
+% HEADER / FOOTER
+% -------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancyhead[L]{%
+    \rmfamily\bfseries\fontsize{10.5}{12}\selectfont
+     DSA PROJECT BASED LEARNING WITH C++
+}
+
+\fancyhead[R]{%
+    \rmfamily\bfseries\fontsize{10.5}{12}\selectfont
+    PROJECT PROPOSAL
+}
+
+\fancyfoot[R]{%
+    \rmfamily\fontsize{10}{12}\selectfont
+    Page \thepage
+}
+
+\setlength{\headheight}{14pt}
+\setlength{\headsep}{23pt}
+\setlength{\footskip}{24pt}
+
+% -------------------------------------------------
+% DOCUMENT
+% -------------------------------------------------
+\begin{document}
+
+% -------------------------------------------------
+% PAGE 1
+% -------------------------------------------------
+
+\vspace*{4mm}
+
+\bluebigheading{PROJECT AND TEAM INFORMATION}
+
+\vspace{13mm}
+
+\blueheading{Project Title}
+
+\vspace{1mm}
+
+
+
+\answerbox[1.0cm]{VidOptix — VIDEO COMPRESSION SYSTEM}
+
+\vspace{13mm}
+
+\blueheading{Student / Team Information}
+
+\vspace{2mm}
+
+% -------------------------------------------------
+% TEAM INFORMATION TABLE
+% -------------------------------------------------
+
+\noindent
+\begin{tabularx}{\textwidth}
+{|>{\RaggedRight\arraybackslash}p{0.69\textwidth}|
+ >{\RaggedRight\arraybackslash}X|}
+\hline
+
+\begin{minipage}[t]{\linewidth}
+\vspace{1.5mm}
+\textit{Team Name:}\\[-1mm]
+\textit{Team \#}
+\vspace{1.5mm}
+\end{minipage}
+&
+\begin{minipage}[t]{\linewidth}
+\vspace{1.5mm}
+\textit{BitSquad}\\[-1mm]
+\textit{DSCPP-III-2026-T198}
+\vspace{1.5mm}
+\end{minipage}
+\\
+\hline
+
+% -------------------------------------------------
+% TEAM MEMBER 1
+% -------------------------------------------------
+
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 1 (Team Lead)}\\[-1mm]
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+
+\textit{Goswami, Anshika -- 2510380062}\\
+\textit{2510380062@geu.ac.in}
+
+\vspace{2mm}
+
+\includegraphics[
+    width=3.0cm,
+    height=1.5cm,
+    keepaspectratio
+]{WhatsApp Image 2026-08-28 at 8.21.27 PM.jpeg}
+
+\end{minipage}
+\\
+\hline
+
+% -------------------------------------------------
+% TEAM MEMBER 2
+% -------------------------------------------------
+
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 2}\\[-1mm]
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+
+\textit{ Yadav ,Yaduveer-- 2510370438}\\
+\textit{2510370438@geu.ac.in}
+
+\vspace{2mm}
+
+\includegraphics[
+    width=3.0cm,
+    height=1.5cm,
+    keepaspectratio
+]{WhatsApp Image 2026-08-28 at 7.54.24 PM.jpeg}
+
+\end{minipage}
+\\
+\hline
+
+% -------------------------------------------------
+% TEAM MEMBER 3
+% -------------------------------------------------
+
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 3}\\[-1mm]
+
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+
+\textit{Chaudhary, Deepanshi -- 2510370456}\\
+\textit{2510370456@geu.ac.in}
+
+\vspace{2mm}
+
+\includegraphics[
+    width=3.0cm,
+    height=1.5cm,
+    keepaspectratio
+]{WhatsApp Image 2026-08-28 at 8.36.05 PM.jpeg}
+
+\end{minipage}
+\\
+\hline
+
+% -------------------------------------------------
+% TEAM MEMBER 4
+% -------------------------------------------------
+
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+\textbf{Team member 4}\\[-1mm]
+
+\vspace{2.0cm}
+\end{minipage}
+&
+\begin{minipage}[t][3.25cm][t]{\linewidth}
+\vspace{1.5mm}
+
+\textit{Ubaid,Mohd -- 2510370084}\\
+\textit{2510370084@geu.ac.in}
+
+\vspace{2mm}
+
+\includegraphics[
+    width=3.0cm,
+    height=1.5cm,
+    keepaspectratio
+]{WhatsApp Image 2026-08-28 at 8.50.58 PM.jpeg}
+
+\end{minipage}
+\\
+\hline
+
+\end{tabularx}
+
+\newpage
+
+% -------------------------------------------------
+% PAGE 2
+% -------------------------------------------------
+\vspace{8mm}
+\bluebigheading{PROPOSAL DESCRIPTION (10 pts)}
+
+\vspace{12mm}
+
+\blueheading{Motivation (1 pt)}
+
+\vspace{3mm}
+
+
+\answerbox[7.5cm]{
+\textbf{Problem Statement}
+
+\vspace{2mm}
+
+large videos require large data and storage space to save , share and transfer it. as the resolution and duration of video increase, the size of video increases. 
+That’s what compression is for.
+
+Our project is to build a simple video compression system which will compress the video while keeping the quality as much as possible.
+The biggest thing we want to fix is the balance between the size of a video file and the quality of the video.
+
+
+The system will allow us to lose some quality intentionally so as to make the file much smaller. To keep all the tiny details and to make a huge file
+The project will also demonstrate how data structures and algorithms are used in life.
+
+In particular it will use Huffman coding, priority queues or min-heaps and tree structures to tackle a real-world compression problem.
+}
+
+\vspace{12mm}
+
+\blueheading{State of the Art / Current solution (1 pt)}
+
+\vspace{1mm}
+
+\answerbox[7.95cm]{Today video compression is mainly done using codecs like H.264/AVC, H.265/HEVC and AV1. These codecs use techniques to make videos smaller while still keeping the image sharp. Modern video codecs do more than just compress images; they also look at the similarities between images that follow each other. They use motion estimation and inter-frame prediction for this purpose.
+
+Common methods used in todays video compression include
+
+\vspace{1mm}
+
+\textbf{Transform coding:} Changes image information into frequency sections to find details.
+
+\textbf{Quantization:} Removes details to get a controlled level of quality loss.
+
+\textbf{Zigzag Scanning:} Arranges the numbers in a way that helps with compression.
+
+\textbf{RLE:} Makes repeated numbers, zeros smaller.
+
+\textbf{Huffman Coding:} Makes the data smaller by using different lengths, for different parts.
+
+\vspace{2mm}
+
+Modern codecs do a job at compression but they are hard to create and have many parts that work together.
+\vspace{1mm}
+
+
+}
+
+\vspace{25mm}
+\newpage
+
+\blueheading{Project Goals and Milestones (2 pts)}
+
+\vspace{3mm}
+
+\answerbox[9.95cm]{
+\textbf{Goals}
+
+1.To create a video compression system that makes videos smaller but keeps them looking good with about 75 to 80 percent of the original quality.
+\vspace{1mm}
+2. To. Build a compression process that is easy to manage using DCT, quantization, zigzag scanning, RLE and Huffman coding.
+
+\Vspace{1mm}
+
+3. To put the video compression techniques into a working system. The goal is to test and improve the system so it finds the balance between making the video smaller and keeping the video clear.
+
+\Vspace{3mm}
+
+\textbf{Milestones}
+
+1. Identifying the problem choosing the topic and doing research, on video compression.
+
+\Vspace{1mm}
+
+2. Finalizing the compression process. Choosing OpenCV and FFmpeg for handling videos.
+
+\Vspace{1mm}
+
+3.. Adding DCT, quantization, zigzag, RLE and Huffman coding into the system (to be completed by Week 1 to 5).
+
+\Vspace{1mm}
+
+4.. Checking the system using compression ratio, file size, time to process and PSNR and SSIM (to be completed by Week 6 to 8).
+
+\Vspace{1mm}
+
+5. Making improvements writing the instructions and showing the project (to be completed by Week 9 to 10).
+}
+
+\vspace{15mm}
+
+\blueheading{Project Approach (3 pts)}
+
+\vspace{3mm}
+
+
+\answerbox[12.55cm]{The project will follow a frame‑based video compression approach. The solution will be designed as a sequence of compression stages. Each stage will process the output of the previous stage.
+
+The project will use a frame‑based video compression method. The solution will be built as a series of compression stages. Each stage will take the output from the stage and process it further.
+
+\textbf{1. Video Frame Extraction:}
+
+The input video will be read using OpenCV or FFmpeg. These tools will handle video decoding, extracting frames and reading video data such as resolution and frame rate. The processing will happen one frame at a time to keep things and to use memory efficiently.
+
+\textbf{2. Transform and Lossy Compression:}
+
+Each frame will be split into 8×8 pixel blocks. Then the Discrete Cosine Transform or DCT will convert the pixel values into frequency coefficients. After that quantization will reduce the precision of the coefficients. The quantization level will be adjusted to control how compression we get versus how good the video looks.
+
+\textbf{3. Coefficient. Rle:}
+
+The quantized coefficients will be arranged using zigzag scanning. This method groups values and zeros together which helps in compressing the data better. Then Run-Length Encoding or RLE will be used to represent repeated values efficiently.
+
+\textbf{4. Huffman. Compressed Data:}
+
+The output from RLE will be further compressed using Huffman coding. A priority queue or min-heap will be used in C or C++ to build the Huffman tree. This tree will generate variable‑length codes for the data. The final compressed binary data will be saved along with the metadata.
+
+\textbf{5.. Optimization:}
+
+Different quantization levels and sample videos will be tested. The goal is to find a balance between file size reduction and maintaining about 75 to 80 percent quality. The system will be tested using compression ratio, file size reduction, processing time and quality metrics such, as PSNR and SSIM.
+}
+\newpage
+
+% -------------------------------------------------
+% PAGE 3
+% -------------------------------------------------
+\blueheading{System Architecture (High Level Diagram)(2 pts)}
+
+\vspace{1mm}
+
+\answerbox[10.8cm]{
+    \centering
+    \includegraphics[
+        width=\linewidth,
+        keepaspectratio
+    ]{architecture.png}
+}
+
+\vspace{12mm}
+
+
+\blueheading{Project Outcome / Deliverables (1 pts)}
+
+\vspace{1mm}
+
+
+\answerbox[10.45cm]{The project will create a working video compression system based on frames. It will reduce the size of video files while keeping the quality at around 75 to 80 percent of the original. The goal is to make videos smaller without losing much clarity.ze while maintaining approximately 75–80 percent visual quality.
+\vspace{2mm}
+
+What we will deliver:
+
+\textbf{1.}1. A working video compression pipeline that uses DCT, quantization, zigzag scanning, RLE and Huffman coding. Each step will be included to process the frames and shrink the file size.
+
+\vspace{1mm}
+
+\textbf{2.} A program that takes a video as input processes each frame and produces a compressed output file. The program will handle the compression workflow from start to finish.
+
+\vspace{1mm}
+
+\textbf{3.}A structured implementation of Huffman coding. This will use a priority queue or min-heap as the data structure to build the Huffman tree efficiently.
+
+\vspace{1mm}
+
+\textbf{4.}A quality and compression evaluation based on compression ratio, file-size reduction, processing time, and PSNR/SSIM.
+
+\vspace{1mm}
+
+\textbf{5.}A comparison of quantization levels. We will test how each level affects compression and quality to find the balance between file size and image appearance.
+
+\vspace{1mm}
+
+\textbf{6.}Full project documentation including source code, system design, architecture diagrams, test results and a final demonstration of the system in action.
+
+\vspace{3mm}
+The final output will show that combining transform-based methods like DCT with techniques, like Huffman coding and run-length encoding can significantly reduce video size while still maintaining a good level of visual quality.}
+
+\vspace{12mm}
+\newpage
+
+\blueheading{Assumptions}
+
+\vspace{6mm}
+
+\answerbox[3.65cm]{Key assumptions include:
+
+75-80 percent of visual quality is acceptable. Visual quality, at this level is considered fine.
+
+Testing videos will have resolution and length so processing time remains manageable. Videos of size help keep the system quick.
+
+OpenCV and FFmpeg will read videos. Extract frames. OpenCV and FFmpeg handle the reading part.
+
+The proposed DCT, quantization, zigzag, RLE and Huffman steps will handle the compression process. DCT, quantization, zigzag, RLE and Huffman are the core stages.}
+
+\vspace{12mm}
+
+\blueheading{References}
+
+\vspace{1mm}
+
+
+\answerbox[6.8cm]{
+\begin{enumerate}
+\setlength{\itemsep}{0pt}
+\setlength{\parskip}{0pt}
+
+\item OpenCV Documentation -- Video I/O and Frame Processing: \\
+\href{https://docs.opencv.org/4.13.0/dd/de7/group}
+\vspace{2mm}
+\item OpenCV -- Reading and Writing Videos using OpenCV: \\
+\href{https://opencv.org/reading-and-writing-videos-using-opencv/}{https://opencv.org/reading-and-writing-videos-using-opencv/}
+\vspace{2mm}
+\item NIST Dictionary of Algorithms and Data Structures -- Huffman Coding: \\
+\href{https://xlinux.nist.gov/dads/HTML/huffmanCoding.html}
+\vspace{2mm}
+\item Wolfram MathWorld -- Huffman Coding: \\
+\href{https://mathworld.wolfram.com/HuffmanCoding.html}
+\vspace{2mm}
+\item RLE Discussion and Implementation: \\
+\href{https://michaeldipperstein.github.io/rle.html}
+\vspace{2mm}
+
+\end{enumerate}
+}
+
+\end{document}
