@@ -15,7 +15,3 @@ The pipeline breaks video sequences into individual frames and applies classical
 
 ---
 
-## 📂 Project Structure
-```text
-pbl_vidoptix_3rd_semester/
-├── Phase-1/          # project report
