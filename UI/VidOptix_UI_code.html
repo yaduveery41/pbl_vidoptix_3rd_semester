@@ -1,0 +1,1402 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VidOptix — Video Studio</title>
+
+<style>
+:root {
+  --bg: #f3f1f7;
+  --panel: #ffffff;
+  --panel2: #f8f7fb;
+  --text: #211c2b;
+  --muted: #81798e;
+  --line: #e3deeb;
+  --purple: #9b7aff;
+  --purple2: #7651df;
+  --soft: #eee8ff;
+  --shadow: 0 12px 35px rgba(30,20,55,.06);
+}
+
+body.dark {
+  --bg: #09090b;
+  --panel: #141416;
+  --panel2: #19191d;
+  --text: #f6f4fa;
+  --muted: #a09daa;
+  --line: #2a292e;
+  --purple: #a78bfa;
+  --purple2: #8057e8;
+  --soft: #292137;
+  --shadow: 0 12px 35px rgba(0,0,0,.15);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, Arial, sans-serif;
+  transition: background .2s, color .2s;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 248px;
+  padding: 26px 18px 18px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  z-index: 3;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 4px 7px 28px;
+}
+
+.brand-mark {
+  height: 42px;
+  width: 42px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg,#b6a0ff,#7046dd);
+  border-radius: 13px;
+  color: white;
+  font-size: 23px;
+}
+
+.brand-title {
+  font-weight: 850;
+  font-size: 21px;
+  letter-spacing: -.8px;
+}
+
+.brand-title span { color: var(--purple); }
+
+.brand-sub {
+  font-size: 9px;
+  letter-spacing: 2.8px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-weight: 700;
+}
+
+.nav-label, .history-heading {
+  font-size: 10px;
+  letter-spacing: 1.7px;
+  color: var(--muted);
+  font-weight: 800;
+  padding: 0 10px;
+  margin: 17px 0 10px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 13px 12px;
+  border-radius: 10px;
+  margin-bottom: 4px;
+}
+
+.nav span {
+  width: 17px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.nav:hover, .nav.active {
+  background: var(--soft);
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 26px;
+}
+
+.count {
+  background: var(--soft);
+  color: var(--purple);
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0;
+  font-size: 10px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow: auto;
+}
+
+.history-empty {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  padding: 8px 10px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.history-open {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  flex: 1;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  border-radius: 9px;
+  padding: 10px 8px;
+}
+
+.history-open:hover, .history-open.current {
+  background: var(--panel2);
+  border-color: var(--line);
+}
+
+.history-play {
+  color: var(--purple);
+  font-size: 12px;
+}
+
+.history-name {
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-delete {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px;
+  border-radius: 6px;
+}
+
+.history-delete:hover {
+  color: #f87171;
+  background: var(--panel2);
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 13px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel2);
+}
+
+.status-line {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  background: #a78bfa;
+  border-radius: 50%;
+}
+
+.status-sub {
+  font-size: 10px;
+  color: var(--muted);
+  padding: 8px 0 0 15px;
+}
+
+.main {
+  margin-left: 248px;
+  padding: 25px 34px 30px;
+  max-width: 1800px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 19px;
+  margin-bottom: 27px;
+}
+
+.breadcrumb {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.breadcrumb b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.version {
+  font-size: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  color: var(--muted);
+  background: var(--panel);
+}
+
+.theme-switch {
+  display: flex;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.theme-btn {
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.theme-btn.active {
+  background: var(--soft);
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  min-height: 270px;
+  padding: 42px 45px;
+  border: 1px solid var(--line);
+  border-radius: 21px;
+  background:
+    radial-gradient(ellipse at 88% 35%,#7d55d91a,transparent 38%),
+    var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.kicker {
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: var(--purple);
+  margin: 0 0 18px;
+}
+
+.hero h1 {
+  font-size: clamp(30px,3.2vw,46px);
+  letter-spacing: -1.7px;
+  line-height: 1.08;
+  margin: 0 0 15px;
+  max-width: 650px;
+}
+
+.hero p:not(.kicker) {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+  max-width: 520px;
+  margin: 0 0 23px;
+}
+
+.primary {
+  border: 0;
+  border-radius: 9px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 14px 19px;
+}
+
+.hero-art {
+  width: 185px;
+  height: 185px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  position: relative;
+  margin-right: 20px;
+}
+
+.orbit {
+  position: absolute;
+  width: 170px;
+  height: 145px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transform: rotate(-30deg);
+}
+
+.orbit.two {
+  width: 155px;
+  height: 175px;
+  transform: rotate(32deg);
+}
+
+.hero-play {
+  width: 91px;
+  height: 91px;
+  display: grid;
+  place-items: center;
+  border-radius: 25px;
+  background: #f5f3fa;
+  color: #17131f;
+  font-size: 31px;
+  box-shadow: 0 12px 35px #0002;
+  z-index: 1;
+}
+
+.section-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 34px 0 19px;
+}
+
+.section-title p {
+  margin: 0 0 8px;
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.section-title h2 {
+  font-size: 23px;
+  letter-spacing: -.6px;
+  margin: 0;
+}
+
+.step-label {
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 3px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0,1.15fr) minmax(330px,.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 19px;
+}
+
+.panel-head h3 {
+  font-size: 14px;
+  margin: 0 0 7px;
+}
+
+.panel-head p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.file-types {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.dropzone {
+  min-height: 215px;
+  border: 1px dashed #625b70;
+  border-radius: 12px;
+  background: var(--panel2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 22px;
+  transition: .2s;
+}
+
+.dropzone.dragover {
+  border-color: var(--purple);
+  background: var(--soft);
+}
+
+.upload-icon {
+  height: 49px;
+  width: 49px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background: var(--soft);
+  color: var(--purple);
+  font-size: 26px;
+  margin-bottom: 14px;
+}
+
+.dropzone h4 {
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.dropzone p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0 0 15px;
+}
+
+.secondary {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hint {
+  font-size: 10px !important;
+  margin: 12px 0 0 !important;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  margin-top: 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.file-icon {
+  height: 39px;
+  width: 39px;
+  display: grid;
+  place-items: center;
+  background: var(--soft);
+  color: var(--purple);
+  border-radius: 9px;
+}
+
+.file-details {
+  min-width: 0;
+  flex: 1;
+}
+
+.file-details strong {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  margin-bottom: 5px;
+}
+
+.file-details span {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.remove-btn {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: #f87171;
+  border-radius: 7px;
+  padding: 8px;
+  font-size: 10px;
+}
+
+.settings-label {
+  font-size: 11px;
+  font-weight: 700;
+  margin: 22px 0 10px;
+}
+
+.mode-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mode-card {
+  position: relative;
+  text-align: left;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px 12px;
+  min-height: 91px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel2);
+  color: var(--text);
+}
+
+.mode-card.selected {
+  border-color: var(--purple);
+  background: var(--soft);
+}
+
+.mode-card .mode-symbol {
+  font-size: 16px;
+  color: var(--purple);
+}
+
+.mode-card strong {
+  display: block;
+  font-size: 11px;
+  margin: 1px 0 8px;
+}
+
+.mode-card small {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.mode-card .check {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 10px;
+  color: var(--purple);
+  display: none;
+}
+
+.mode-card.selected .check { display: block; }
+
+.note {
+  display: flex;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 10px;
+  background: var(--panel2);
+  margin: 17px 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.note b {
+  color: var(--text);
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+}
+
+.process-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 9px;
+  padding: 14px;
+  background: var(--purple2);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+  margin: 12px 0 0;
+}
+
+.preview {
+  height: 230px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel2);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.preview-placeholder {
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 18px;
+}
+
+.preview-circle {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 50%;
+  color: var(--purple);
+  font-size: 18px;
+  margin: 0 auto 12px;
+}
+
+.preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #050506;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.stat {
+  background: var(--panel2);
+  padding: 12px;
+  border-radius: 9px;
+  min-width: 0;
+}
+
+.stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .6px;
+  margin-bottom: 8px;
+}
+
+.stat strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 10px;
+  padding: 24px 2px;
+}
+
+@media(max-width:1050px) {
+  .workspace { grid-template-columns: 1fr; }
+  .hero { padding: 32px; }
+  .hero-art { margin-right: 0; }
+}
+
+@media(max-width:680px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    inset: auto;
+    padding: 15px;
+  }
+
+  .sidebar .nav-label,
+  .sidebar .nav,
+  .sidebar .history-heading,
+  .sidebar .history-list,
+  .sidebar-bottom {
+    display: none;
+  }
+
+  .main {
+    margin: 0;
+    padding: 17px;
+  }
+
+  .topbar { align-items: flex-start; }
+  .hero { padding: 25px; min-height: 0; }
+  .hero-art { display: none; }
+  .hero h1 { font-size: 32px; }
+  .panel { padding: 17px; }
+  .mode-options { grid-template-columns: 1fr; }
+  .section-title h2 { font-size: 20px; }
+  .stats { grid-template-columns: 1fr; }
+  .version { display: none; }
+}
+</style>
+</head>
+
+<body class="dark">
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">◇</div>
+    <div>
+      <div class="brand-title">Vid<span>Optix</span></div>
+      <div class="brand-sub">VIDEO STUDIO</div>
+    </div>
+  </div>
+
+  <div class="nav-label">WORKSPACE</div>
+  <a class="nav active" href="#"><span>▦</span> Dashboard</a>
+  <a class="nav" href="#workspace"><span>▣</span> Video workspace</a>
+  <a class="nav" href="#previewPanel"><span>▤</span> Preview &amp; results</a>
+
+  <div class="history-heading">
+    <span>SAVED HISTORY</span>
+    <span class="count" id="historyCount">0</span>
+  </div>
+
+  <div class="history-list" id="historyList">
+    <p class="history-empty">Your saved video projects will appear here.</p>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="status-line">
+      <span class="dot"></span>
+      <span>Frontend demo mode</span>
+    </div>
+    <div class="status-sub">C++ backend connection pending</div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <header class="topbar">
+    <div class="breadcrumb">Workspace / <b>Overview</b></div>
+
+    <div class="top-right">
+      <div class="theme-switch">
+        <button class="theme-btn" id="lightBtn" type="button">☼ Light</button>
+        <button class="theme-btn active" id="darkBtn" type="button">☾ Dark</button>
+      </div>
+      <span class="version">VidOptix v1.0</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="kicker">SMART VIDEO WORKFLOW</p>
+      <h1>Make every frame count.</h1>
+      <p>
+        Upload, preview and prepare videos for compression or enhancement —
+        all from one clean workspace.
+      </p>
+      <button class="primary" id="newProjectBtn" type="button">
+        Start a new project →
+      </button>
+    </div>
+
+    <div class="hero-art">
+      <div class="orbit"></div>
+      <div class="orbit two"></div>
+      <div class="hero-play">▶</div>
+    </div>
+  </section>
+
+  <div class="section-title" id="workspace">
+    <div>
+      <p>YOUR WORKSPACE</p>
+      <h2>New video project</h2>
+    </div>
+    <span class="step-label">01 / 03 · Setup</span>
+  </div>
+
+  <section class="workspace">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Upload video</h3>
+          <p>Choose an MP4 video to start your workflow.</p>
+        </div>
+        <span class="file-types">MP4 only</span>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <div class="upload-icon">↑</div>
+        <h4>Drop your video here</h4>
+        <p>or browse files on your computer</p>
+        <button class="secondary" id="browseBtn" type="button">
+          Browse video
+        </button>
+        <p class="hint">Supported format: MP4</p>
+        <input id="videoInput" type="file" accept=".mp4,video/mp4" hidden>
+      </div>
+
+      <div class="file-info" id="fileInfo" hidden>
+        <div class="file-icon">▶</div>
+        <div class="file-details">
+          <strong id="fileName"></strong>
+          <span id="fileSize"></span>
+        </div>
+        <button class="remove-btn" id="removeBtn" type="button">Remove</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Processing settings</h3>
+          <p>Customize your video workflow.</p>
+        </div>
+        <span class="file-types">STEP 02</span>
+      </div>
+
+      <div class="settings-label">Processing mode</div>
+
+      <div class="mode-options">
+        <button class="mode-card selected" data-mode="compress" type="button">
+          <span class="mode-symbol">▤</span>
+          <span>
+            <strong>Compression</strong>
+            <small>Reduce video file size</small>
+          </span>
+          <span class="check">✓</span>
+        </button>
+
+        <button class="mode-card" data-mode="enhance" type="button">
+          <span class="mode-symbol">✧</span>
+          <span>
+            <strong>Enhancement</strong>
+            <small>Improve frame appearance</small>
+          </span>
+          <span class="check">✓</span>
+        </button>
+
+        <button class="mode-card" data-mode="both" type="button">
+          <span class="mode-symbol">◈</span>
+          <span>
+            <strong>Both operations</strong>
+            <small>Enhance, then compress</small>
+          </span>
+          <span class="check">✓</span>
+        </button>
+      </div>
+
+      <div class="note">
+        <span>ⓘ</span>
+        <div>
+          <b>Backend connection pending</b>
+          This interface is ready for integration. Actual video processing
+          will run once the C++ backend is connected.
+        </div>
+      </div>
+
+      <button class="process-btn" id="processBtn" type="button">
+        Prepare video →
+      </button>
+      <p class="status" id="statusMessage" role="status">
+        Upload a video to begin.
+      </p>
+    </div>
+
+    <div class="panel" id="previewPanel">
+      <div class="panel-head">
+        <div>
+          <h3>Video preview</h3>
+          <p>Check your selected video before processing.</p>
+        </div>
+        <span class="file-types">STEP 03</span>
+      </div>
+
+      <div class="preview">
+        <div class="preview-placeholder" id="previewPlaceholder">
+          <div class="preview-circle">▶</div>
+          Your video preview will appear here
+        </div>
+        <video id="videoPreview" controls hidden></video>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span>FILE SIZE</span>
+          <strong id="statSize">—</strong>
+        </div>
+        <div class="stat">
+          <span>RESOLUTION</span>
+          <strong id="statResolution">—</strong>
+        </div>
+        <div class="stat">
+          <span>MODE</span>
+          <strong id="statMode">Compression</strong>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    <span>VidOptix · Video Enhancement &amp; Compression System</span>
+    <span>Designed for a focused workflow</span>
+  </footer>
+
+</main>
+
+<script>
+const videoInput = document.getElementById("videoInput");
+const browseBtn = document.getElementById("browseBtn");
+const dropzone = document.getElementById("dropzone");
+const fileInfo = document.getElementById("fileInfo");
+const fileName = document.getElementById("fileName");
+const fileSize = document.getElementById("fileSize");
+const videoPreview = document.getElementById("videoPreview");
+const previewPlaceholder = document.getElementById("previewPlaceholder");
+const statSize = document.getElementById("statSize");
+const statResolution = document.getElementById("statResolution");
+const statMode = document.getElementById("statMode");
+const statusMessage = document.getElementById("statusMessage");
+const removeBtn = document.getElementById("removeBtn");
+const historyList = document.getElementById("historyList");
+const historyCount = document.getElementById("historyCount");
+
+let selectedFile = null;
+let selectedMode = "compress";
+let previewURL = null;
+let currentHistoryId = null;
+
+const DB_NAME = "VidOptixProjects";
+const DB_VERSION = 1;
+let projectDB = null;
+
+function setStatus(message) {
+  statusMessage.textContent = message;
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024 * 1024) {
+    return (bytes / 1024).toFixed(1) + " KB";
+  }
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
+
+/* Browser database for saved video history */
+function openProjectDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = event => {
+      const db = event.target.result;
+
+      if (!db.objectStoreNames.contains("projects")) {
+        const store = db.createObjectStore("projects", {
+          keyPath: "id"
+        });
+        store.createIndex("date", "date", { unique: false });
+      }
+    };
+
+    request.onsuccess = () => {
+      projectDB = request.result;
+      resolve(projectDB);
+    };
+
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function saveProject(file) {
+  return new Promise((resolve, reject) => {
+    if (!projectDB) {
+      reject(new Error("Storage unavailable"));
+      return;
+    }
+
+    const project = {
+      id: Date.now().toString(36) +
+          Math.random().toString(36).slice(2, 8),
+      name: file.name,
+      size: file.size,
+      type: file.type || "video/mp4",
+      date: new Date().toISOString(),
+      file: file
+    };
+
+    const transaction = projectDB.transaction(
+      ["projects"], "readwrite"
+    );
+
+    transaction.objectStore("projects").put(project);
+
+    transaction.oncomplete = () => resolve(project);
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () =>
+      reject(transaction.error || new Error("Storage limit reached"));
+  });
+}
+
+function getAllProjects() {
+  return new Promise((resolve, reject) => {
+    if (!projectDB) {
+      resolve([]);
+      return;
+    }
+
+    const request = projectDB
+      .transaction(["projects"], "readonly")
+      .objectStore("projects")
+      .getAll();
+
+    request.onsuccess = () => {
+      const projects = request.result.sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
+      resolve(projects);
+    };
+
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function getProject(id) {
+  return new Promise((resolve, reject) => {
+    const request = projectDB
+      .transaction(["projects"], "readonly")
+      .objectStore("projects")
+      .get(id);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function deleteProject(id) {
+  return new Promise((resolve, reject) => {
+    const transaction = projectDB.transaction(
+      ["projects"], "readwrite"
+    );
+
+    transaction.objectStore("projects").delete(id);
+
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+/* Display saved projects in the sidebar */
+async function renderHistory() {
+  historyList.innerHTML = "";
+
+  try {
+    const projects = await getAllProjects();
+    historyCount.textContent = projects.length;
+
+    if (projects.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "history-empty";
+      empty.textContent =
+        "Your saved video projects will appear here.";
+      historyList.appendChild(empty);
+      return;
+    }
+
+    projects.forEach(project => {
+      const row = document.createElement("div");
+      row.className = "history-row";
+
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "history-open" +
+        (project.id === currentHistoryId ? " current" : "");
+      open.title = "Open " + project.name;
+
+      const play = document.createElement("span");
+      play.className = "history-play";
+      play.textContent = "▶";
+
+      const name = document.createElement("span");
+      name.className = "history-name";
+      name.textContent = project.name;
+
+      open.append(play, name);
+
+      open.addEventListener("click", async () => {
+        try {
+          const saved = await getProject(project.id);
+
+          if (saved && saved.file) {
+            await uploadVideo(saved.file, true, saved.id);
+            setStatus("Project reopened from saved history.");
+          } else {
+            setStatus("Saved video unavailable. Please upload it again.");
+          }
+        } catch (error) {
+          setStatus("Could not reopen this project.");
+        }
+      });
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "history-delete";
+      del.textContent = "×";
+      del.title = "Delete from history";
+      del.setAttribute("aria-label", "Delete " + project.name);
+
+      del.addEventListener("click", async () => {
+        try {
+          await deleteProject(project.id);
+
+          if (currentHistoryId === project.id) {
+            currentHistoryId = null;
+          }
+
+          await renderHistory();
+          setStatus("Project removed from history.");
+        } catch (error) {
+          setStatus("Could not delete this project.");
+        }
+      });
+
+      row.append(open, del);
+      historyList.appendChild(row);
+    });
+
+  } catch (error) {
+    historyCount.textContent = "—";
+    historyList.textContent =
+      "History is unavailable in this browser.";
+  }
+}
+
+/* Load a video into the preview */
+async function uploadVideo(file, fromHistory = false, historyId = null) {
+  if (!file) return;
+
+  if (!file.name.toLowerCase().endsWith(".mp4")) {
+    setStatus("Please select an MP4 video.");
+    videoInput.value = "";
+    return;
+  }
+
+  if (previewURL) {
+    URL.revokeObjectURL(previewURL);
+  }
+
+  selectedFile = file;
+  currentHistoryId = historyId;
+  previewURL = URL.createObjectURL(file);
+
+  fileName.textContent = file.name;
+  fileSize.textContent = formatSize(file.size);
+  statSize.textContent = formatSize(file.size);
+  statResolution.textContent = "Reading…";
+
+  fileInfo.hidden = false;
+  dropzone.hidden = true;
+  previewPlaceholder.hidden = true;
+  videoPreview.hidden = false;
+
+  videoPreview.src = previewURL;
+  videoPreview.load();
+
+  setStatus(
+    fromHistory
+      ? "Project reopened and ready to preview."
+      : "Video loaded. Choose a processing mode."
+  );
+
+  if (!fromHistory) {
+    try {
+      const saved = await saveProject(file);
+      currentHistoryId = saved.id;
+      await renderHistory();
+    } catch (error) {
+      setStatus(
+        "Video loaded, but history could not save it. Browser storage may be full."
+      );
+    }
+  } else {
+    await renderHistory();
+  }
+}
+
+/* Upload controls */
+browseBtn.addEventListener("click", event => {
+  event.stopPropagation();
+  videoInput.click();
+});
+
+videoInput.addEventListener("change", () => {
+  uploadVideo(videoInput.files[0]);
+});
+
+dropzone.addEventListener("click", event => {
+  if (event.target !== browseBtn) {
+    videoInput.click();
+  }
+});
+
+dropzone.addEventListener("dragover", event => {
+  event.preventDefault();
+  dropzone.classList.add("dragover");
+});
+
+dropzone.addEventListener("dragleave", () => {
+  dropzone.classList.remove("dragover");
+});
+
+dropzone.addEventListener("drop", event => {
+  event.preventDefault();
+  dropzone.classList.remove("dragover");
+  uploadVideo(event.dataTransfer.files[0]);
+});
+
+/* Read video resolution */
+videoPreview.addEventListener("loadedmetadata", () => {
+  const width = videoPreview.videoWidth;
+  const height = videoPreview.videoHeight;
+
+  statResolution.textContent = width && height
+    ? width + " × " + height
+    : "Unavailable";
+});
+
+videoPreview.addEventListener("error", () => {
+  setStatus("This MP4 could not be previewed by your browser.");
+});
+
+/* Processing mode selection */
+document.querySelectorAll(".mode-card").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".mode-card").forEach(card => {
+      card.classList.remove("selected");
+    });
+
+    button.classList.add("selected");
+    selectedMode = button.dataset.mode;
+
+    statMode.textContent =
+      selectedMode === "compress" ? "Compression" :
+      selectedMode === "enhance" ? "Enhancement" : "Both";
+
+    setStatus("Selected mode: " + statMode.textContent);
+  });
+});
+
+/* Processing placeholder until C++ backend is connected */
+document.getElementById("processBtn").addEventListener("click", () => {
+  if (!selectedFile) {
+    setStatus("Please upload an MP4 video first.");
+    return;
+  }
+
+  setStatus(
+    "Video is ready. Actual processing requires the C++ backend."
+  );
+});
+
+/* Remove current video from the workspace */
+removeBtn.addEventListener("click", () => {
+  selectedFile = null;
+  currentHistoryId = null;
+  videoInput.value = "";
+
+  if (previewURL) {
+    URL.revokeObjectURL(previewURL);
+    previewURL = null;
+  }
+
+  videoPreview.pause();
+  videoPreview.removeAttribute("src");
+  videoPreview.load();
+
+  videoPreview.hidden = true;
+  previewPlaceholder.hidden = false;
+  fileInfo.hidden = true;
+  dropzone.hidden = false;
+
+  statSize.textContent = "—";
+  statResolution.textContent = "—";
+
+  setStatus("Upload an MP4 video to begin.");
+  renderHistory();
+});
+
+/* Theme switching */
+function setTheme(theme) {
+  const dark = theme === "dark";
+
+  document.body.classList.toggle("dark", dark);
+
+  document.getElementById("lightBtn")
+    .classList.toggle("active", !dark);
+
+  document.getElementById("darkBtn")
+    .classList.toggle("active", dark);
+}
+
+document.getElementById("lightBtn").addEventListener("click", () => {
+  setTheme("light");
+});
+
+document.getElementById("darkBtn").addEventListener("click", () => {
+  setTheme("dark");
+});
+
+/* Start a new project */
+document.getElementById("newProjectBtn").addEventListener("click", () => {
+  document.getElementById("workspace").scrollIntoView({
+    behavior: "smooth"
+  });
+});
+
+/* Initialize saved history */
+openProjectDB()
+  .then(renderHistory)
+  .catch(() => {
+    setStatus(
+      "Project history is unavailable in this browser. You can still upload and preview videos."
+    );
+  });
+</script>
+
+</body>
+</html>
