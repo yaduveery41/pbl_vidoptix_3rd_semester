@@ -1,0 +1,287 @@
+// VidOptix - Color MP4 Compressor with optional Enhancement
+// Windows + VS Code
+//
+// Step 1: compresses the video to a playable, color MP4 using FFmpeg's
+//         H.264 encoder (libx264).
+// Step 2: asks whether you also want to ENHANCE the compressed video
+//         (denoise, contrast/brightness, sharpen). Answer "n" to stop after
+//         compression; the enhancement step is completely optional.
+//
+// This is a practical demo: FFmpeg handles all video encoding. It does NOT use
+// the custom DCT/RLE/Huffman codec from the original VidOptix source.
+//
+// Requirements:
+//   1. FFmpeg installed and available on PATH.
+//   2. A C++17 compiler (MinGW-w64 g++ or MSYS2 g++).
+//
+// Build:
+//   g++ -std=c++17 -O2 vidoptix_combined.cpp -o vidoptix_combined.exe
+//
+// Run:
+//   .\vidoptix_combined.exe
+//
+// CRF controls quality/size: lower = better quality/larger file;
+// higher = smaller file/lower quality. Default is 27.
+
+#include <algorithm>
+#include <cctype>
+#include <cstdlib>
+#include <filesystem>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
+namespace fs = std::filesystem;
+
+static const int         DEFAULT_CRF     = 27;
+static const std::string COMPRESS_PRESET = "slow";     // slower = smaller file
+static const std::string ENHANCE_PRESET  = "medium";
+
+// Enhancement filters: denoise (hqdn3d), contrast/brightness (eq), sharpen (unsharp).
+struct EnhanceLevel {
+    const char* name;
+    const char* filters;
+};
+
+static const EnhanceLevel LEVELS[3] = {
+    {"Mild",     "hqdn3d=1.5:1.5:3:3,eq=contrast=1.03:brightness=0.01,unsharp=5:5:0.3"},
+    {"Balanced", "hqdn3d=2:1.5:3:2.25,eq=contrast=1.05:brightness=0.02,unsharp=5:5:0.5"},
+    {"Strong",   "hqdn3d=3:2:4:3,eq=contrast=1.08:brightness=0.03,unsharp=5:5:0.7"}
+};
+
+// ---------- helpers ----------
+
+std::string quotePath(const std::string& path) {
+    // Windows command-line quoting. Embedded double quotes are rejected;
+    // ordinary paths with spaces are supported.
+    if (path.find('"') != std::string::npos) {
+        throw std::runtime_error("Paths containing double quotes are not supported.");
+    }
+    return "\"" + path + "\"";
+}
+
+double fileSizeMB(const fs::path& path) {
+    std::error_code ec;
+    auto bytes = fs::file_size(path, ec);
+    if (ec) return -1.0;
+    return static_cast<double>(bytes) / (1024.0 * 1024.0);
+}
+
+bool samePath(const std::string& a, const std::string& b) {
+    return fs::absolute(fs::path(a)).lexically_normal() ==
+           fs::absolute(fs::path(b)).lexically_normal();
+}
+
+std::string readLine(const std::string& prompt) {
+    std::string value;
+    std::cout << prompt;
+    std::getline(std::cin, value);
+    // Trim simple surrounding whitespace.
+    const auto first = value.find_first_not_of(" \t\r\n");
+    if (first == std::string::npos) return "";
+    const auto last = value.find_last_not_of(" \t\r\n");
+    return value.substr(first, last - first + 1);
+}
+
+// Asks a yes/no question. Pressing Enter picks the default.
+bool askYesNo(const std::string& question, bool defaultYes) {
+    while (true) {
+        std::string answer = readLine(question + (defaultYes ? " [Y/n]: " : " [y/N]: "));
+        if (!std::cin || answer.empty()) return defaultYes;   // Enter, or input closed
+
+        std::transform(answer.begin(), answer.end(), answer.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+        if (answer == "y" || answer == "yes") return true;
+        if (answer == "n" || answer == "no")  return false;
+        std::cerr << "Please answer y or n.\n";
+    }
+}
+
+// Returns the index (0-2) of the chosen enhancement level. Enter = Balanced.
+int chooseLevel() {
+    std::cout << "\nChoose enhancement level:\n"
+              << "1. Mild enhancement\n"
+              << "2. Balanced enhancement\n"
+              << "3. Strong enhancement\n";
+
+    while (true) {
+        std::string choice = readLine("Enter choice (1-3) [2]: ");
+        if (!std::cin || choice.empty()) return 1;
+        if (choice == "1") return 0;
+        if (choice == "2") return 1;
+        if (choice == "3") return 2;
+        std::cerr << "Please enter 1, 2, or 3.\n";
+    }
+}
+
+// ---------- the two FFmpeg steps ----------
+
+bool compressVideo(const std::string& input, const std::string& output, int crf) {
+    // The scale filter rounds width/height down to even numbers, because
+    // H.264 with yuv420p fails on videos with an odd width or height.
+    // Audio is re-encoded to AAC when present. Color is retained.
+    const std::string command =
+        "ffmpeg -hide_banner -y -i " + quotePath(input) +
+        " -map 0:v:0 -map \"0:a?\""
+        " -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\""
+        " -c:v libx264 -preset " + COMPRESS_PRESET + " -crf " + std::to_string(crf) +
+        " -pix_fmt yuv420p -c:a aac -b:a 96k -movflags +faststart " +
+        quotePath(output);
+
+    return std::system(command.c_str()) == 0;
+}
+
+// Enhances the already-compressed video. It is re-encoded at the same CRF used
+// for compression so the file does not grow back; audio is copied untouched.
+bool enhanceVideo(const std::string& input, const std::string& output,
+                  const char* filters, int crf) {
+    const std::string command =
+        "ffmpeg -hide_banner -y -i " + quotePath(input) +
+        " -map 0:v:0 -map \"0:a?\""
+        " -vf \"" + std::string(filters) + "\""
+        " -c:v libx264 -preset " + ENHANCE_PRESET + " -crf " + std::to_string(crf) +
+        " -pix_fmt yuv420p -c:a copy -movflags +faststart " +
+        quotePath(output);
+
+    return std::system(command.c_str()) == 0;
+}
+
+// ---------- main ----------
+
+int main() {
+    try {
+        std::cout << "========================================\n"
+                  << "   VidOptix - Compressor + Enhancement\n"
+                  << "========================================\n\n";
+
+        // ----- Step 1: compression -----
+        std::string input = readLine("Enter input video path (e.g. C:\\Videos\\input.mp4): ");
+        if (input.empty() || !fs::exists(fs::path(input))) {
+            std::cerr << "ERROR: Input file was not found.\n";
+            return 1;
+        }
+
+        std::string output = readLine("Enter compressed output MP4 path [compressed.mp4]: ");
+        if (output.empty()) output = "compressed.mp4";
+
+        if (samePath(input, output)) {
+            std::cerr << "ERROR: Input and output paths must be different.\n";
+            return 1;
+        }
+
+        std::string crfText = readLine("H.264 quality CRF 18-30 [" + std::to_string(DEFAULT_CRF) + "]: ");
+        int crf = DEFAULT_CRF;
+        if (!crfText.empty()) {
+            try {
+                size_t used = 0;
+                crf = std::stoi(crfText, &used);
+                if (used != crfText.size() || crf < 18 || crf > 30) {
+                    std::cerr << "ERROR: Enter a whole number from 18 to 30.\n";
+                    return 1;
+                }
+            } catch (...) {
+                std::cerr << "ERROR: Invalid CRF value.\n";
+                return 1;
+            }
+        }
+
+        std::cout << "\nStarting compression...\n"
+                  << "Video encoder: H.264 (libx264)\n"
+                  << "Quality CRF:   " << crf << "\n"
+                  << "Audio:         AAC 96 kb/s (if audio exists)\n"
+                  << "Output:        " << output << "\n\n";
+
+        if (!compressVideo(input, output, crf)) {
+            std::cerr << "\nERROR: FFmpeg failed during compression.\n"
+                      << "Check that FFmpeg is installed, is on PATH, and supports libx264.\n";
+            return 1;
+        }
+
+        const double inputMB      = fileSizeMB(fs::path(input));
+        const double compressedMB = fileSizeMB(fs::path(output));
+
+        if (compressedMB < 0) {
+            std::cerr << "\nCompression finished, but output size could not be read.\n";
+            return 1;
+        }
+
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "\n========== COMPRESSION RESULTS ==========\n"
+                  << "Original size : " << inputMB << " MB\n"
+                  << "Output size   : " << compressedMB << " MB\n";
+
+        if (inputMB > 0) {
+            const double saved = (1.0 - compressedMB / inputMB) * 100.0;
+            std::cout << "Space saved   : " << saved << "%\n"
+                      << "Size ratio    : " << inputMB / compressedMB << " : 1\n";
+            if (saved < 0) {
+                std::cout << "Note: output is larger than input. The source may already be\n"
+                          << "highly compressed; try a higher CRF for a smaller file.\n";
+            }
+        }
+
+        std::cout << "Output video  : " << fs::absolute(fs::path(output)).string() << "\n"
+                  << "Status        : SUCCESS\n"
+                  << "=========================================\n\n";
+
+        // ----- Step 2: optional enhancement -----
+        if (!askYesNo("Do you want to enhance the compressed video?", false)) {
+            std::cout << "\nNo enhancement. Your compressed video is ready:\n"
+                      << fs::absolute(fs::path(output)).string() << "\n"
+                      << "Open it in VLC or Windows Media Player.\n";
+            return 0;
+        }
+
+        const EnhanceLevel& level = LEVELS[chooseLevel()];
+
+        std::string enhanced = readLine("Enter enhanced output MP4 path [enhanced.mp4]: ");
+        if (enhanced.empty()) enhanced = "enhanced.mp4";
+
+        if (samePath(enhanced, output) || samePath(enhanced, input)) {
+            std::cerr << "ERROR: The enhanced file must differ from the input and compressed files.\n"
+                      << "Your compressed video is still available at: "
+                      << fs::absolute(fs::path(output)).string() << "\n";
+            return 1;
+        }
+
+        std::cout << "\nEnhancing compressed video...\n"
+                  << "Level:   " << level.name << "\n"
+                  << "Quality: CRF " << crf << " (same as compression)\n"
+                  << "Audio:   copied from the compressed file\n"
+                  << "Output:  " << enhanced << "\n\n";
+
+        if (!enhanceVideo(output, enhanced, level.filters, crf)) {
+            std::cerr << "\nERROR: FFmpeg enhancement failed.\n"
+                      << "Your compressed video is still available at: "
+                      << fs::absolute(fs::path(output)).string() << "\n";
+            return 1;
+        }
+
+        const double enhancedMB = fileSizeMB(fs::path(enhanced));
+        if (enhancedMB < 0) {
+            std::cerr << "\nEnhancement finished, but output size could not be read.\n";
+            return 1;
+        }
+
+        std::cout << "\n========== ENHANCEMENT RESULTS ==========\n"
+                  << "Original size   : " << inputMB << " MB\n"
+                  << "Compressed size : " << compressedMB << " MB\n"
+                  << "Enhanced size   : " << enhancedMB << " MB\n";
+
+        if (inputMB > 0) {
+            std::cout << "Saved vs original: " << (1.0 - enhancedMB / inputMB) * 100.0 << "%\n";
+        }
+
+        std::cout << "Compressed video : " << fs::absolute(fs::path(output)).string() << "\n"
+                  << "Enhanced video   : " << fs::absolute(fs::path(enhanced)).string() << "\n"
+                  << "Status           : SUCCESS\n"
+                  << "=========================================\n"
+                  << "Open the MP4 files in VLC or Windows Media Player.\n";
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: " << e.what() << '\n';
+        return 1;
+    }
+}
